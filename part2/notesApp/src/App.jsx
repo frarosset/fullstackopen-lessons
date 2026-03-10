@@ -18,7 +18,7 @@ const App = () => {
       setNotes(initialNotes);
     });
   }, []);
-  console.log("render", notes.length, "notes");
+  console.log("render", notes?.length, "notes");
 
   // do not render anything if notes is still null
   if (!notes) {

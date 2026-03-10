@@ -1,5 +1,7 @@
 import axios from "axios";
-const baseUrl = "http://localhost:3001/notes";
+// const baseUrl = "http://localhost:3001/notes";
+// const baseUrl = "http://localhost:3001/api/notes"; // requires CORS enabled on server
+const baseUrl = "/api/notes";
 
 // The following return promises
 
