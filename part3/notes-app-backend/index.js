@@ -41,30 +41,35 @@ app.use(requestLogger);
 //   res.send("<h1>Hello World!</h1>");
 // });
 
-app.get("/api/notes", (req, res) => {
-  Note.find().then((notes) => res.json(notes));
+app.get("/api/notes", (req, res, next) => {
+  Note.find()
+    .then((notes) => res.json(notes))
+    .catch((err) => next(err));
 });
 
-app.get("/api/notes/:id", (req, res) => {
+app.get("/api/notes/:id", (req, res, next) => {
   const id = req.params.id;
 
-  Note.findById(id).then((note) => res.json(note));
-
-  // if (note) {
-  //   res.json(note);
-  // } else {
-  //   res.status(404).end();
-  // }
+  Note.findById(id)
+    .then((note) => {
+      if (note) {
+        res.json(note);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((err) => next(err));
 });
 
-app.delete("/api/notes/:id", (req, res) => {
+app.delete("/api/notes/:id", (req, res, next) => {
   const id = req.params.id;
-  notes = notes.filter((note) => note.id !== id);
 
-  res.status(204).end();
+  Note.findByIdAndDelete(id)
+    .then(() => res.status(204).end())
+    .catch((err) => next(err));
 });
 
-app.post("/api/notes", (req, res) => {
+app.post("/api/notes", (req, res, next) => {
   const body = req.body;
 
   if (!body.content) {
@@ -76,7 +81,29 @@ app.post("/api/notes", (req, res) => {
     important: body.important || false,
   });
 
-  note.save().then((savedNote) => res.json(savedNote));
+  note
+    .save()
+    .then((savedNote) => res.json(savedNote))
+    .catch((err) => next(err));
+});
+
+app.put("/api/notes/:id", (request, response, next) => {
+  const { content, important } = request.body;
+
+  Note.findById(request.params.id)
+    .then((note) => {
+      if (!note) {
+        return response.status(404).end();
+      }
+
+      note.content = content;
+      note.important = important;
+
+      return note.save().then((updatedNote) => {
+        response.json(updatedNote);
+      });
+    })
+    .catch((error) => next(error));
 });
 
 const unknownEndpoint = (request, response) => {
@@ -84,6 +111,19 @@ const unknownEndpoint = (request, response) => {
 };
 
 app.use(unknownEndpoint);
+
+const errorHandler = (err, req, res, next) => {
+  console.log(err.message);
+
+  if (err.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" });
+  }
+
+  next(err); // pass to default Express error handler
+};
+
+// this has to be the last loaded middleware, also all the routes should be registered before this!
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
