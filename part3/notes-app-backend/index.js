@@ -72,10 +72,6 @@ app.delete("/api/notes/:id", (req, res, next) => {
 app.post("/api/notes", (req, res, next) => {
   const body = req.body;
 
-  if (!body.content) {
-    return res.status(400).json({ error: "content missing" });
-  }
-
   const note = new Note({
     content: body.content,
     important: body.important || false,
@@ -117,6 +113,8 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === "CastError") {
     return res.status(400).send({ error: "malformatted id" });
+  } else if ((err.name = "ValidationError")) {
+    return res.status(400).json({ error: err.message });
   }
 
   next(err); // pass to default Express error handler
