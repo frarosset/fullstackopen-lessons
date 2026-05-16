@@ -1,0 +1,22 @@
+POST http://localhost:3001/api/notes HTTP/1.1
+content-type: application/json
+
+{
+    "content": "Postman note to edit", 
+    "important": true
+}
+
+###
+GET http://localhost:3001/api/notes
+
+###
+PUT http://localhost:3001/api/notes/69fca353e415eba4a81bfb77 HTTP/1.1
+content-type: application/json
+
+{
+    "content": "Postman note edited", 
+    "important": false
+}
+
+###
+GET http://localhost:3001/api/notes
